@@ -59,6 +59,18 @@ jobs:
             git push origin "$tag_name"
           fi
 
+      - name: Build release artifacts
+        run: ./gradlew clean build verify sourcesJar --no-daemon
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag_name }}
+          generate_release_notes: true
+          files: |
+            build/libs/*-sources.jar
+            build/libs/*.jar
+
       - name: Bump next development version
         shell: bash
         run: |
