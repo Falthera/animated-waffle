@@ -3,7 +3,7 @@
 set -eu
 
 APP_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-GRADLE_VERSION="8.3"
+GRADLE_VERSION="9.5.1"
 GRADLE_DIST_NAME="gradle-${GRADLE_VERSION}-bin"
 GRADLE_EXTRACTED_NAME="gradle-${GRADLE_VERSION}"
 GRADLE_DIST_URL="https://services.gradle.org/distributions/${GRADLE_DIST_NAME}.zip"
