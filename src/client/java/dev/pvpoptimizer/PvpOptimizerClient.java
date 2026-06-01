@@ -4,8 +4,6 @@ import dev.pvpoptimizer.client.JumpResetController;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.entity.event.v1.EntityDamageEvents;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,17 +14,26 @@ public final class PvpOptimizerClient implements ClientModInitializer {
 
 	private static final JumpResetController CONTROLLER = new JumpResetController();
 
+	private int lastHurtTime = 0;
+
 	@Override
 	public void onInitializeClient() {
-		ClientTickEvents.END_CLIENT_TICK.register(CONTROLLER::onClientTick);
-		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> CONTROLLER.reset());
-
-		EntityDamageEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
-			MinecraftClient client = MinecraftClient.getInstance();
-			if (client.player != null && entity == client.player) {
-				CONTROLLER.onLocalPlayerDamaged((ClientPlayerEntity) entity, source, amount);
+		ClientTickEvents.END_CLIENT_TICK.register(client -> {
+			ClientPlayerEntity player = client.player;
+			if (player != null && client.world != null) {
+				int hurtTime = player.hurtTime;
+				// hurtTime resets to its max value (10) when the player is hit
+				if (hurtTime > lastHurtTime) {
+					CONTROLLER.onLocalPlayerDamaged(player, null, 0f);
+				}
+				lastHurtTime = hurtTime;
 			}
-			return true;
+			CONTROLLER.onClientTick(client);
+		});
+
+		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+			lastHurtTime = 0;
+			CONTROLLER.reset();
 		});
 	}
 
