@@ -20,6 +20,8 @@ repositories {
 
 configurations {
 	mappings
+	modImplementation
+	implementation.extendsFrom(modImplementation)
 }
 
 
