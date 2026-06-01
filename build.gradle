@@ -26,8 +26,18 @@ configurations {
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	// Add mod dependencies using Loom's `modImplementation` when available;
+	// fall back to `implementation` so the build can still resolve during evaluation.
+	def addModDep = { notation ->
+		if (configurations.findByName('modImplementation') != null) {
+			dependencies.modImplementation(notation)
+		} else {
+			dependencies.add('implementation', notation)
+		}
+	}
+
+	addModDep("net.fabricmc:fabric-loader:${project.loader_version}")
+	addModDep("net.fabricmc.fabric-api:fabric-api:${project.fabric_version}")
 }
 
 java {
