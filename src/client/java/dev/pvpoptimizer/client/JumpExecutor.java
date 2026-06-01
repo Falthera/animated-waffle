@@ -9,7 +9,7 @@ public final class JumpExecutor {
 			&& player.isOnGround()
 			&& !player.isTouchingWater()
 			&& !player.isClimbing()
-			&& !player.isFallFlying();
+			&& !player.isGliding();
 	}
 
 	public void jump(ClientPlayerEntity player) {
