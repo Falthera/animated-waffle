@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ClientPlayerEntity.class)
 public abstract class ClientPlayerEntityMixin {
 	@Inject(method = "damage", at = @At("HEAD"))
-	private void pvpoptimizer$onDamage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+	private void pvpoptimizer$onDamage(DamageSource source, float amount, CallbackInfoReturnable cir) {
 		PvpOptimizerClient.controller().onLocalPlayerDamaged((ClientPlayerEntity) (Object) this, source, amount);
 	}
 }

@@ -20,8 +20,17 @@ repositories {
 
 configurations {
 	mappings
-	modImplementation
-	implementation.extendsFrom(modImplementation)
+}
+
+loom {
+	splitEnvironmentSourceSets()
+
+	mods {
+		"pvpoptimizer" {
+			sourceSet sourceSets.main
+			sourceSet sourceSets.client
+		}
+	}
 }
 
 
