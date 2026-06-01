@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ClientPlayerEntity.class)
 public abstract class ClientPlayerEntityMixin {
-	@Inject(method = "damage(Lnet/minecraft/entity/damage/DamageSource;F)Z", at = @At("HEAD"))
+	@Inject(method = "damage(Lnet/minecraft/class_1282;F)Z", at = @At("HEAD"))
 	private void pvpoptimizer$onDamage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
 		PvpOptimizerClient.controller().onLocalPlayerDamaged((ClientPlayerEntity) (Object) this, source, amount);
 	}
