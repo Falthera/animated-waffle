@@ -1,20 +1,13 @@
 package dev.pvpoptimizer.mixin;
 
-import dev.pvpoptimizer.PvpOptimizerClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+// This file is intentionally left as a no-op placeholder.
+// Damage detection has been moved to PvpOptimizerClient
+// using the Fabric Entity Damage Events API.
+// This class must still exist because pvpoptimizer.mixins.json references it.
 
-@Mixin(LivingEntity.class)
+import net.minecraft.client.network.ClientPlayerEntity;
+import org.spongepowered.asm.mixin.Mixin;
+
+@Mixin(ClientPlayerEntity.class)
 public abstract class ClientPlayerEntityMixin {
-	@Inject(method = "damage(Lnet/minecraft/class_1282;F)Z", at = @At("HEAD"))
-	private void pvpoptimizer$onDamage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
-		if ((Object) this instanceof ClientPlayerEntity player) {
-			PvpOptimizerClient.controller().onLocalPlayerDamaged(player, source, amount);
-		}
-	}
 }
