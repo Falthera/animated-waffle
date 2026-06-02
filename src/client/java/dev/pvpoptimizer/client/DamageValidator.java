@@ -5,8 +5,6 @@ import net.minecraft.entity.damage.DamageSource;
 
 public final class DamageValidator {
 	public boolean isCombatDamage(ClientPlayerEntity player, DamageSource source) {
-		// When source is null, damage was detected via hurtTime polling.
-		// hurtTime only increments when actual damage is taken, so we trust it.
 		if (source == null) {
 			return true;
 		}
