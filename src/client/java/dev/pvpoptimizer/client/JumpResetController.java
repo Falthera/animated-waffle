@@ -5,41 +5,36 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.damage.DamageSource;
 
 public final class JumpResetController {
-	private static final int JUMP_DELAY_TICKS = 1;
-	private static final int COOLDOWN_TICKS = 1;
-	private static final double KNOCKBACK_THRESHOLD = 0.0009D;
+	private static final int JUMP_DELAY_TICKS = 0;
+	private static final int COOLDOWN_TICKS = 10;
 
-	private final DamageValidator damageValidator = new DamageValidator();
 	private final CooldownManager cooldownManager = new CooldownManager();
 	private final JumpTimingEngine jumpTimingEngine = new JumpTimingEngine();
 	private final JumpExecutor jumpExecutor = new JumpExecutor();
 	private final DebugLogger debugLogger = new DebugLogger();
 
-	private int damageTick = Integer.MIN_VALUE;
-	private double damageVelocityX;
-	private double damageVelocityZ;
-
 	public void reset() {
 		cooldownManager.reset();
 		jumpTimingEngine.reset();
-		damageTick = Integer.MIN_VALUE;
-		damageVelocityX = 0.0D;
-		damageVelocityZ = 0.0D;
 	}
 
+	/**
+	 * Called by the old damage path (kept for compatibility, no longer used).
+	 */
 	public void onLocalPlayerDamaged(ClientPlayerEntity player, DamageSource source, float amount) {
-		if (player == null || source == null) {
-			return;
-		}
+		// No-op: predictive jump is handled by triggerPredictiveJump.
+	}
+
+	/**
+	 * Called when an opponent's attack cooldown crosses the threshold.
+	 */
+	public void triggerPredictiveJump(ClientPlayerEntity player) {
+		if (player == null) return;
 
 		int currentTick = player.age;
-		if (!damageValidator.isCombatDamage(player, source)) {
-			debugLogger.damage("ignored non-combat source");
-			return;
-		}
 
 		if (!cooldownManager.canSchedule(currentTick)) {
-			debugLogger.cooldown("blocked duplicate activation");
+			debugLogger.cooldown("blocked by cooldown");
 			return;
 		}
 
@@ -48,13 +43,10 @@ public final class JumpResetController {
 			return;
 		}
 
-		damageTick = currentTick;
-		damageVelocityX = player.getVelocity().x;
-		damageVelocityZ = player.getVelocity().z;
 		cooldownManager.arm(currentTick + COOLDOWN_TICKS);
 		jumpTimingEngine.schedule(currentTick + JUMP_DELAY_TICKS);
 
-		debugLogger.damage("combat hit accepted");
+		debugLogger.damage("predictive jump scheduled");
 		debugLogger.schedule(currentTick + JUMP_DELAY_TICKS);
 	}
 
@@ -75,34 +67,13 @@ public final class JumpResetController {
 		}
 
 		if (!jumpExecutor.canJump(client, player)) {
-			debugLogger.jump("state invalid");
-			jumpTimingEngine.reset();
-			return;
-		}
-
-		if (!hasKnockback(player)) {
-			debugLogger.knockback("no verified knockback");
+			debugLogger.jump("state invalid, cancelling");
 			jumpTimingEngine.reset();
 			return;
 		}
 
 		jumpExecutor.jump(player);
-		debugLogger.jump("jump executed");
+		debugLogger.jump("predictive jump executed");
 		jumpTimingEngine.reset();
-	}
-
-	private boolean hasKnockback(ClientPlayerEntity player) {
-		if (damageTick == Integer.MIN_VALUE) {
-			return false;
-		}
-
-		if (player.age - damageTick > 3) {
-			return false;
-		}
-
-		double deltaX = player.getVelocity().x - damageVelocityX;
-		double deltaZ = player.getVelocity().z - damageVelocityZ;
-		double horizontalDelta = (deltaX * deltaX) + (deltaZ * deltaZ);
-		return horizontalDelta >= KNOCKBACK_THRESHOLD;
 	}
 }
