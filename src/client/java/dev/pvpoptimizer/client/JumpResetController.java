@@ -6,9 +6,7 @@ import net.minecraft.entity.damage.DamageSource;
 
 public final class JumpResetController {
 
-    // Must fire on tick 0 — no delay.
     private static final int JUMP_DELAY_TICKS = 0;
-    // Prevent re-triggering within the same hurt window.
     private static final int COOLDOWN_TICKS = 10;
 
     private final CooldownManager cooldownManager = new CooldownManager();
@@ -22,12 +20,7 @@ public final class JumpResetController {
         jumpTimingEngine.reset();
     }
 
-    /**
-     * Called by the mixin the moment the local player takes damage.
-     * This is the reactive path — fires in response to actual knockback.
-     */
-    public void onLocalPlayerDamaged(ClientPlayerEntity player,
-                                     DamageSource source, float amount) {
+    public void onLocalPlayerDamaged(ClientPlayerEntity player, DamageSource source) {
         if (player == null) return;
         if (!damageValidator.isCombatDamage(player, source)) {
             debugLogger.damage("ignored: non-combat source");
@@ -47,17 +40,12 @@ public final class JumpResetController {
         }
 
         cooldownManager.arm(currentTick + COOLDOWN_TICKS);
-        // Schedule for tick 0 — same tick the knockback lands.
         jumpTimingEngine.schedule(currentTick + JUMP_DELAY_TICKS);
 
         debugLogger.damage("reactive jump scheduled at tick " + currentTick);
         debugLogger.schedule(currentTick + JUMP_DELAY_TICKS);
     }
 
-    /**
-     * Called every client tick (END_CLIENT_TICK).
-     * Executes the scheduled jump as soon as the player is in a valid state.
-     */
     public void onClientTick(MinecraftClient client) {
         if (!jumpTimingEngine.hasPendingJump()) return;
 
@@ -81,11 +69,6 @@ public final class JumpResetController {
         jumpTimingEngine.reset();
     }
 
-    /**
-     * Kept so PvpOptimizerClient compiles, but predictive jumping is removed.
-     */
-    public void triggerPredictiveJump(ClientPlayerEntity player) {
-        // No-op. Predictive pre-jumping fires before knockback lands and
-        // therefore cannot cancel backward momentum. Use the damage path instead.
-    }
+    // No-op — predictive jumping removed, kept so PvpOptimizerClient compiles.
+    public void triggerPredictiveJump(ClientPlayerEntity player) {}
 }
