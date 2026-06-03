@@ -2,7 +2,6 @@ package dev.pvpoptimizer.client;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.damage.DamageSource;
 
 public final class JumpResetController {
 
@@ -20,12 +19,8 @@ public final class JumpResetController {
         jumpTimingEngine.reset();
     }
 
-    public void onLocalPlayerDamaged(ClientPlayerEntity player, DamageSource source) {
+    public void onLocalPlayerDamaged(ClientPlayerEntity player) {
         if (player == null) return;
-        if (!damageValidator.isCombatDamage(player, source)) {
-            debugLogger.damage("ignored: non-combat source");
-            return;
-        }
 
         int currentTick = player.age;
 
@@ -69,6 +64,6 @@ public final class JumpResetController {
         jumpTimingEngine.reset();
     }
 
-    // No-op — predictive jumping removed, kept so PvpOptimizerClient compiles.
+    // No-op — kept so PvpOptimizerClient compiles.
     public void triggerPredictiveJump(ClientPlayerEntity player) {}
 }
