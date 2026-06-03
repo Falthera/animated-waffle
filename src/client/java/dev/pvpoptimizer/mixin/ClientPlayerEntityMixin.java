@@ -16,7 +16,7 @@ public abstract class ClientPlayerEntityMixin {
     @Inject(method = "method_6099", at = @At("HEAD"))
     private void onApplyDamage(DamageRecord record, DamageSource source, boolean blocked, CallbackInfo ci) {
         if ((Object) this instanceof ClientPlayerEntity self) {
-            PvpOptimizerClient.controller().onLocalPlayerDamaged(self, source, 0f);
+            PvpOptimizerClient.controller().onLocalPlayerDamaged(self, source);
         }
     }
 }
